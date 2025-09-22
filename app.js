@@ -1,7 +1,8 @@
 const express = require("express");
 const expressSession = require("express-session");
-const {Pool} = require("pg");
 const pgSession = require("connect-pg-simple")(expressSession);
+const cors = require("cors");
+const {Pool} = require("pg");
 const passport = require("./utils/passport.js");
 require("dotenv").config();
 const authRoute = require("./routes/authRoute.js");
@@ -10,6 +11,10 @@ const authRoute = require("./routes/authRoute.js");
 
 const app = express();
 
+app.use(cors({
+    origin: process.env.FRONTEND_DOMAIN,
+    credentials: true
+}));
 
 app.use(express.urlencoded({extended: true}));
 app.use(express.json());
