@@ -8,7 +8,6 @@ const passport = require("../utils/passport.js");
 
 
 const signupPost = asyncHandler(async function(req, res, next) {
-    console.log(req.body)
     const errors = validationResult(req);
     if (!errors.isEmpty()) {
         return res.status(400).json({errors: errors.array()});
@@ -38,6 +37,17 @@ const signupPost = asyncHandler(async function(req, res, next) {
 
 
 const loginPost = asyncHandler(async function(req, res) {
+    if (!req.body.username) {
+        return res.status(400).json(
+            {errors: [{msg: "Username required"}]}
+        );
+    }
+    if (!req.body.password) {
+        return res.status(400).json(
+            {errors: [{msg: "Password required"}]}
+        );
+    }
+
     const authFunction = passport.authenticate("local", function(error, user, info) {
         if (error) {
             return res.status(500).json({
