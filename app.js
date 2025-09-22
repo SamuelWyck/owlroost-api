@@ -4,6 +4,7 @@ const {Pool} = require("pg");
 const pgSession = require("connect-pg-simple")(expressSession);
 const passport = require("./utils/passport.js");
 require("dotenv").config();
+const authRoute = require("./routes/authRoute.js");
 
 
 
@@ -36,6 +37,7 @@ app.use(passport.session());
 app.get("/", function(req, res) {
     res.json({result: "Hello world"});
 });
+app.use("/auth", authRoute);
 
 
 
