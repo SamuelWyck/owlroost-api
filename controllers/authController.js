@@ -21,6 +21,7 @@ const signupPost = asyncHandler(async function(req, res, next) {
     try {
         user = await db.createUser(email, username, pwdHash);
     } catch (error) {
+        console.log(error);
         return res.status(500).json(
             {errors: [{msg: "Unable to create user"}]}
         );
