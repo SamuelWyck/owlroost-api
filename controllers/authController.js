@@ -87,7 +87,7 @@ function logoutPost(req, res) {
 
 function authStatusGet(req, res) {
     const authStatus = (req.user) ? true : false;
-    return res.json({authenticated: authStatus});
+    return res.json({authenticated: authStatus, user: req.user});
 };
 
 
