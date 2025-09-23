@@ -6,6 +6,7 @@ const {Pool} = require("pg");
 const passport = require("./utils/passport.js");
 require("dotenv").config();
 const authRoute = require("./routes/authRoute.js");
+const postsRoute = require("./routes/postsRoute.js");
 
 
 
@@ -43,6 +44,7 @@ app.get("/", function(req, res) {
     res.json({result: "Hello world"});
 });
 app.use("/auth", authRoute);
+app.use("/posts", postsRoute);
 
 
 
