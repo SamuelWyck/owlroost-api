@@ -54,11 +54,21 @@ async function createUser(email, username, password) {
     return user;
 };
 
+async function createPost(userId, title, content) {
+    const {rows} = await pool.query(
+        "INSERT INTO posts (author_id, title, content) VALUES ($1, $2, $3) RETURNING *",
+        [userId, title, content]
+    );
+    const post = rows[0];
+    return post;
+};
+
 
 
 module.exports = {
     findUserById,
     findUserByUsername,
     findUserByEmail,
-    createUser
+    createUser,
+    createPost
 };
