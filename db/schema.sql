@@ -11,14 +11,16 @@ CREATE TABLE IF NOT EXISTS "posts" (
     author_id UUID NOT NULL,
     title VARCHAR(200) NOT NULL,
     content VARCHAR(11000) NOT NULL,
+    timestamp TIMESTAMP(3) DEFAULT CURRENT_TIMESTAMP, 
     CONSTRAINT fk_post_author_id FOREIGN KEY (author_id) REFERENCES users(id) ON DELETE CASCADE 
 );
 
 CREATE TABLE IF NOT EXISTS "comments" (
     id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
-    content VARCHAR(6000),
     author_id UUID NOT NULL,
     post_id UUID NOT NULL,
+    content VARCHAR(6000),
+    timestamp TIMESTAMP(3) DEFAULT CURRENT_TIMESTAMP, 
     CONSTRAINT fk_comment_author_id FOREIGN KEY (author_id) REFERENCES users(id) ON DELETE CASCADE,
     CONSTRAINT fk_parent_post_id FOREIGN KEY (post_id) REFERENCES posts(id) ON DELETE CASCADE
 );
