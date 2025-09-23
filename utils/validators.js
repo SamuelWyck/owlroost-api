@@ -43,6 +43,19 @@ const signupVal = [
 
 
 
+const newPostVal = [
+    body("title").trim()
+        .notEmpty().withMessage("Title required")
+        .isLength({max: 200}).withMessage("Max title length is 200 characters"),
+    body("content").trim()
+        .notEmpty().withMessage("Content required")
+        .isLength({max: 11000}).withMessage("Max post length is 11000 characters")
+        .isLength({min: 10}).withMessage("Minimum post length is 10 characters")
+];
+
+
+
 module.exports = {
-    signupVal
+    signupVal,
+    newPostVal
 };
