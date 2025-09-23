@@ -85,6 +85,13 @@ function logoutPost(req, res) {
 
 
 
+function authStatusGet(req, res) {
+    const authStatus = (req.user) ? true : false;
+    return res.json({authenticated: authStatus});
+};
+
+
+
 module.exports = {
     signupPost: [
         signupVal,
@@ -92,5 +99,6 @@ module.exports = {
         loginPost
     ],
     loginPost,
-    logoutPost
+    logoutPost,
+    authStatusGet
 };
