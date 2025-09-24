@@ -63,11 +63,11 @@ async function createPost(userId, title, content) {
     return post;
 };
 
-async function getPosts(orderBy) {
-    const {rows} = await pool.query(
-        "SELECT p.id AS post_id, p.title, p.timestamp AS date, COUNT(post_id) AS likes, u.id AS author_id, u.username, u.profile_img_url FROM posts AS p JOIN users AS u ON u.id = p.author_id LEFT JOIN post_likes AS pl ON pl.post_id = p.id GROUP BY p.id, u.id ORDER BY $1",
-        [orderBy]
-    );
+async function getPosts(orderByLikes, limit, offset) {
+    const orderBy = (orderByLikes) ? "likes" : "date";
+    const sql = `SELECT p.id AS post_id, p.title, p.timestamp AS date, COUNT(post_id) AS likes, u.id AS author_id, u.username, u.profile_img_url FROM posts AS p JOIN users AS u ON u.id = p.author_id LEFT JOIN post_likes AS pl ON pl.post_id = p.id GROUP BY p.id, u.id ORDER BY ${orderBy} DESC, u.username DESC LIMIT $1 OFFSET $2`;
+
+    const {rows} = await pool.query(sql, [limit, offset]);
     return rows;
 };
 
