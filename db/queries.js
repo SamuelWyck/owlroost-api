@@ -63,6 +63,14 @@ async function createPost(userId, title, content) {
     return post;
 };
 
+async function getPosts(orderBy) {
+    const {rows} = await pool.query(
+        "SELECT p.id AS post_id, p.title, p.timestamp AS date, COUNT(post_id) AS likes, u.id AS author_id, u.username, u.profile_img_url FROM posts AS p JOIN users AS u ON u.id = p.author_id LEFT JOIN post_likes AS pl ON pl.post_id = p.id GROUP BY p.id, u.id ORDER BY $1",
+        [orderBy]
+    );
+    return rows;
+};
+
 
 
 module.exports = {
@@ -70,5 +78,6 @@ module.exports = {
     findUserByUsername,
     findUserByEmail,
     createUser,
-    createPost
+    createPost,
+    getPosts
 };
