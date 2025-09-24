@@ -25,7 +25,7 @@ CREATE TABLE IF NOT EXISTS "comments" (
     CONSTRAINT fk_parent_post_id FOREIGN KEY (post_id) REFERENCES posts(id) ON DELETE CASCADE
 );
 
-CREATE TABLE IF NOT EXISTS "postLike" (
+CREATE TABLE IF NOT EXISTS "post_likes" (
     id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
     user_id UUID,
     post_id UUID NOT NULL,
@@ -33,7 +33,7 @@ CREATE TABLE IF NOT EXISTS "postLike" (
     CONSTRAINT fk_post_id FOREIGN KEY (post_id) REFERENCES posts(id) ON DELETE CASCADE
 );
 
-CREATE TABLE IF NOT EXISTS "followedUsers" (
+CREATE TABLE IF NOT EXISTS "followed_users" (
     id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
     following_user_id UUID NOT NULL,
     followed_user_id UUID NOT NULL,
