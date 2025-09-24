@@ -6,7 +6,19 @@ const {newPostVal} = require("../utils/validators.js");
 
 
 const postsGet = asyncHandler(async function(req, res) {
-    return res.json({user: req.user});
+    const orderBy = (req.query.orderByLikes) ? 
+    "likes": "date";
+
+    let posts = null;
+    try {
+        posts = await db.getPosts(orderBy);
+    } catch (error) {
+        return res.status(500).json(
+            {errors: [{msg: "Unable to find posts"}]}
+        );
+    }
+
+    return res.json({user: req.user, posts});
 });
 
 
