@@ -2,23 +2,37 @@ const asyncHandler = require("express-async-handler");
 const db = require("../db/queries.js");
 const {validationResult} = require("express-validator");
 const {newPostVal} = require("../utils/validators.js");
+const pagination = require("../utils/paginationManager.js");
 
 
 
 const postsGet = asyncHandler(async function(req, res) {
-    const orderBy = (req.query.orderByLikes) ? 
-    "likes": "date";
+    const orderByLikes = (
+    req.query.orderByLikes && req.query.orderByLikes === "true"
+    ) ? true : false;
+    const pageNum = (req.query.pageNum) ? 
+    req.query.pageNum : 0;
 
     let posts = null;
     try {
-        posts = await db.getPosts(orderBy);
+        posts = await db.getPosts(
+            orderByLikes,
+            pagination.postTakeNum,
+            pagination.calcPostSkip(pageNum)
+        );
     } catch (error) {
         return res.status(500).json(
             {errors: [{msg: "Unable to find posts"}]}
         );
     }
 
-    return res.json({user: req.user, posts});
+    let morePosts = false;
+    if (posts.length === pagination.postTakeNum) {
+        posts.pop();
+        morePosts = true;
+    }
+
+    return res.json({user: req.user, posts, morePosts});
 });
 
 
