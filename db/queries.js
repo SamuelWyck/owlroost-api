@@ -71,6 +71,25 @@ async function getPosts(orderByLikes, limit, offset) {
     return rows;
 };
 
+async function getPostForEdit(postId, userId) {
+    const {rows} = await pool.query(
+        "SELECT * FROM posts WHERE id = $1 AND author_id = $2",
+        [postId, userId]
+    );
+    const post = rows[0];
+    return post;
+};
+
+
+async function updatePost(title, content, postId, userId) {
+    const {rows} = await pool.query(
+        "UPDATE posts SET title = $1, content = $2 WHERE id = $3 AND author_id = $4 RETURNING *",
+        [title, content, postId, userId]
+    );
+    const post = rows[0];
+    return post;
+};
+
 
 
 module.exports = {
@@ -79,5 +98,7 @@ module.exports = {
     findUserByEmail,
     createUser,
     createPost,
-    getPosts
+    getPosts,
+    getPostForEdit,
+    updatePost
 };
