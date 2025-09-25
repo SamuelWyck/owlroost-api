@@ -1,5 +1,5 @@
 class PaginationManger {
-    postTakeNum = 5;
+    postTakeNum = 21;
 
 
     calcPostSkip(pageNum) {
