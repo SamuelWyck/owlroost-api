@@ -1,7 +1,7 @@
 const asyncHandler = require("express-async-handler");
 const db = require("../db/queries.js");
 const {validationResult} = require("express-validator");
-const {newPostVal} = require("../utils/validators.js");
+const {newPostVal, editPostVal} = require("../utils/validators.js");
 const pagination = require("../utils/paginationManager.js");
 
 
@@ -67,10 +67,77 @@ const newPostPost = asyncHandler(async function(req, res) {
 
 
 
+const postEditGet = asyncHandler(async function(req, res) {
+    if (!req.params || !req.params.postId) {
+        return res.status(400).json(
+            {errors: [{msg: "Missing post id param"}]}
+        );
+    }
+
+    const userId = req.user.id;
+    const postId = req.params.postId;
+    let post = null;
+    try {
+        post = await db.getPostForEdit(postId, userId);
+    } catch (error) {
+        console.log(error);
+        return res.status(500).json(
+            {errors: [{msg: "Unable to get post"}]}
+        );
+    }
+    if (!post) {
+        return res.status(400).json(
+            {errors: [{msg: "Unable to get post"}]}
+        ); 
+    }
+
+    return res.json({post, user: req.user});
+});
+
+
+
+const postEditPut = asyncHandler(async function(req, res) {
+    const errors = validationResult(req);
+    if (!errors.isEmpty()) {
+        return res.status(400).json({errors: errors.array()});
+    }
+
+    const userId = req.user.id;
+    const postId = req.params.postId;
+    const title = req.body.title;
+    const content = req.body.content;
+
+    let post = null;
+    try {
+        post = await db.updatePost(
+            title, content, postId, userId
+        );
+    } catch (error) {
+        console.log(error);
+        return res.status(500).json(
+            {errors: [{msg: "Unable to update post"}]}
+        );
+    }
+    if (!post) {
+        return res.status(400).json(
+            {errors: [{msg: "Unable to update post"}]}
+        );
+    }
+
+    return res.json({post, user: req.user});
+});
+
+
+
 module.exports = {
     postsGet,
     newPostPost: [
         newPostVal,
         newPostPost
+    ],
+    postEditGet,
+    postEditPut: [
+        editPostVal,
+        postEditPut
     ]
 };
