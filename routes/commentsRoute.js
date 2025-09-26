@@ -7,6 +7,7 @@ const {isLoggedIn} = require("../utils/authMiddleware.js");
 const commentsRoute = Router();
 
 commentsRoute.get("/:postId", commentsController.commentsGet);
+commentsRoute.post("/new", isLoggedIn, commentsController.createCommentPost);
 
 
 
