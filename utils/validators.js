@@ -69,8 +69,19 @@ const editPostVal = [
 
 
 
+const newCommentVal = [
+    body("postId").trim()
+        .notEmpty().withMessage("Missing post id"),
+    body("content").trim()
+        .notEmpty().withMessage("Comment required")
+        .isLength({max: 6000}).withMessage("Max comment length is 6000 characters")
+];
+
+
+
 module.exports = {
     signupVal,
     newPostVal,
-    editPostVal
+    editPostVal,
+    newCommentVal
 };
