@@ -67,18 +67,17 @@ const newPostPost = asyncHandler(async function(req, res) {
 
 
 
-const postEditGet = asyncHandler(async function(req, res) {
+const postGet = asyncHandler(async function(req, res) {
     if (!req.params || !req.params.postId) {
         return res.status(400).json(
             {errors: [{msg: "Missing post id param"}]}
         );
     }
 
-    const userId = req.user.id;
     const postId = req.params.postId;
     let post = null;
     try {
-        post = await db.getPostForEdit(postId, userId);
+        post = await db.getPost(postId);
     } catch (error) {
         console.log(error);
         return res.status(500).json(
@@ -164,7 +163,7 @@ module.exports = {
         newPostVal,
         newPostPost
     ],
-    postEditGet,
+    postGet,
     postEditPut: [
         editPostVal,
         postEditPut
