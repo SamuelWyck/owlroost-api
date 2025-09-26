@@ -81,7 +81,7 @@ const postGet = asyncHandler(async function(req, res) {
     try {
         [post, postLike] = await Promise.all([
             db.getPost(postId),
-            db.getUserPostLike(postId, userId)
+            db.getPostLike(postId, userId)
         ]);
     } catch (error) {
         console.log(error);
