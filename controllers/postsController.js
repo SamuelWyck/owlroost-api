@@ -129,6 +129,35 @@ const postEditPut = asyncHandler(async function(req, res) {
 
 
 
+const deletePostDelete = asyncHandler(async function(req, res) {
+    if (!req.params || !req.params.postId) {
+        return res.status(400).json(
+            {errors: [{msg: "Missing post id param"}]}
+        );
+    }
+
+    const postId = req.params.postId;
+    const userId = req.user.id;
+    let post = null;
+    try {
+        post = await db.deletePost(postId, userId);
+    } catch (error) {
+        console.log(error);
+        return res.status(500).json(
+            {errors: [{msg: "Unable to delete post"}]}
+        );
+    }
+    if (!post) {
+        return res.status(400).json(
+            {errors: [{msg: "Unable to delete post"}]}
+        );
+    }
+
+    return res.json({user: req.user, post});
+});
+
+
+
 module.exports = {
     postsGet,
     newPostPost: [
@@ -139,5 +168,6 @@ module.exports = {
     postEditPut: [
         editPostVal,
         postEditPut
-    ]
+    ],
+    deletePostDelete
 };
