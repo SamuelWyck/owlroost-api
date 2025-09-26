@@ -110,9 +110,29 @@ async function getPostComments(postId) {
 };
 
 
-async function getUserPostLike(postId, userId) {
+async function getPostLike(postId, userId) {
     const {rows} = await pool.query(
         "SELECT * FROM post_likes WHERE post_id = $1 AND user_id = $2",
+        [postId, userId]
+    );
+    const postLike = (rows[0]) ? rows.length === 1 : null;
+    return postLike;
+};
+
+
+async function createPostLike(postId, userId) {
+    const {rows} = await pool.query(
+        "INSERT INTO post_likes (post_id, user_id) VALUES ($1, $2) RETURNING *",
+        [postId, userId]
+    );
+    const postLike = (rows[0]) ? rows.length === 1 : null;
+    return postLike;
+};
+
+
+async function deletePostLike(postId, userId) {
+    const {rows} = await pool.query(
+        "DELETE FROM post_likes WHERE post_id = $1 AND user_id = $2 RETURNING *",
         [postId, userId]
     );
     const postLike = (rows[0]) ? rows.length === 1 : null;
@@ -132,5 +152,7 @@ module.exports = {
     updatePost,
     deletePost,
     getPostComments,
-    getUserPostLike
+    getPostLike,
+    createPostLike,
+    deletePostLike
 };
