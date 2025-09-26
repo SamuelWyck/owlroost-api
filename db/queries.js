@@ -110,6 +110,16 @@ async function getPostComments(postId) {
 };
 
 
+async function getUserPostLike(postId, userId) {
+    const {rows} = await pool.query(
+        "SELECT * FROM post_likes WHERE post_id = $1 AND user_id = $2",
+        [postId, userId]
+    );
+    const postLike = (rows[0]) ? rows.length === 1 : null;
+    return postLike;
+};
+
+
 
 module.exports = {
     findUserById,
@@ -121,5 +131,6 @@ module.exports = {
     getPost,
     updatePost,
     deletePost,
-    getPostComments
+    getPostComments,
+    getUserPostLike
 };
