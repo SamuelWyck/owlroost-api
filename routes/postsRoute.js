@@ -12,6 +12,7 @@ postsRoute.post("/new", isLoggedIn, postsController.newPostPost);
 postsRoute.get("/:postId", postsController.postGet);
 postsRoute.put("/:postId/edit", isLoggedIn, postsController.postEditPut);
 postsRoute.delete("/:postId/delete", isLoggedIn, postsController.deletePostDelete);
+postsRoute.post("/:postId/like", isLoggedIn, postsController.togglePostLike);
 
 
 
