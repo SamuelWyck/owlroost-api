@@ -65,10 +65,40 @@ const createCommentPost = asyncHandler(async function(req, res) {
 
 
 
+const delCommentDelete = asyncHandler(async function(req, res) {
+    if (!req.params || !req.params.commentId) {
+        return res.status(400).json(
+            {errors: [{msg: "Missing comment id param"}]}
+        );
+    }
+
+    const commentId = req.params.commentId;
+    const userId = req.user.id;
+    let comment = null;
+    try {
+        comment = await db.deleteComment(commentId, userId);
+    } catch (error) {
+        console.log(error);
+        return res.status(500).json(
+            {errors: [{msg: "Unable to delete comment"}]}
+        );
+    }
+    if (!comment) {
+        return res.status(400).json(
+            {errors: [{msg: "Unable to delete comment"}]}
+        );
+    }
+
+    return res.json({comment});
+});
+
+
+
 module.exports = {
     commentsGet,
     createCommentPost: [
         newCommentVal,
         createCommentPost
-    ]
+    ],
+    delCommentDelete
 };
