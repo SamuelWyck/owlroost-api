@@ -91,6 +91,16 @@ async function updatePost(title, content, postId, userId) {
 };
 
 
+async function deletePost(postId, userId) {
+    const {rows} = await pool.query(
+        "DELETE FROM posts WHERE id = $1 AND author_id = $2 RETURNING *",
+        [postId, userId]
+    );
+    const post = rows[0];
+    return post;
+};
+
+
 
 module.exports = {
     findUserById,
@@ -100,5 +110,6 @@ module.exports = {
     createPost,
     getPosts,
     getPostForEdit,
-    updatePost
+    updatePost,
+    deletePost
 };
