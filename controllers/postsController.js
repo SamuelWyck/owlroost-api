@@ -75,9 +75,14 @@ const postGet = asyncHandler(async function(req, res) {
     }
 
     const postId = req.params.postId;
+    const userId = (req.user) ? req.user.id : null;
     let post = null;
+    let postLike = null;
     try {
-        post = await db.getPost(postId);
+        [post, postLike] = await Promise.all([
+            db.getPost(postId),
+            db.getUserPostLike(postId, userId)
+        ]);
     } catch (error) {
         console.log(error);
         return res.status(500).json(
@@ -90,7 +95,8 @@ const postGet = asyncHandler(async function(req, res) {
         ); 
     }
 
-    return res.json({post, user: req.user});
+    const userLikedPost = (postLike) ? true : false;
+    return res.json({post, user: req.user, userLikedPost});
 });
 
 
