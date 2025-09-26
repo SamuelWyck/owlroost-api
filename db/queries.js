@@ -103,7 +103,7 @@ async function deletePost(postId, userId) {
 
 async function getPostComments(postId) {
     const {rows} = await pool.query(
-        "SELECT c.id, c.content, c.author_id, u.username, u.profile_img_url FROM comments AS c JOIN users AS u ON u.id = c.author_id WHERE c.post_id = $1",
+        "SELECT c.id, c.content, c.author_id, c.timestamp, u.username, u.profile_img_url FROM comments AS c JOIN users AS u ON u.id = c.author_id WHERE c.post_id = $1",
         [postId]
     );
     return rows;
@@ -140,6 +140,16 @@ async function deletePostLike(postId, userId) {
 };
 
 
+async function createComment(postId, userId, content) {
+    const {rows} = await pool.query(
+        "INSERT INTO comments (post_id, author_id, content) VALUES ($1, $2, $3) RETURNING *",
+        [postId, userId, content]
+    );
+    const comment = (rows.length === 1) ? rows[0] : null;
+    return comment;
+};
+
+
 
 module.exports = {
     findUserById,
@@ -154,5 +164,6 @@ module.exports = {
     getPostComments,
     getPostLike,
     createPostLike,
-    deletePostLike
+    deletePostLike,
+    createComment
 };
