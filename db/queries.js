@@ -71,10 +71,10 @@ async function getPosts(orderByLikes, limit, offset) {
     return rows;
 };
 
-async function getPostForEdit(postId, userId) {
+async function getPost(postId) {
     const {rows} = await pool.query(
-        "SELECT * FROM posts WHERE id = $1 AND author_id = $2",
-        [postId, userId]
+        "SELECT p.id, p.title, p.content, p.timestamp, COUNT(pl.id) AS likes, u.username, u.profile_img_url FROM posts AS p LEFT JOIN post_likes AS pl ON pl.post_id = p.id JOIN users AS u ON u.id = p.author_id WHERE p.id = $1 GROUP BY p.id, u.id",
+        [postId]
     );
     const post = rows[0];
     return post;
@@ -101,6 +101,15 @@ async function deletePost(postId, userId) {
 };
 
 
+async function getPostComments(postId) {
+    const {rows} = await pool.query(
+        "SELECT c.id, c.content, c.author_id, u.username, u.profile_img_url FROM comments AS c JOIN users AS u ON u.id = c.author_id WHERE c.post_id = $1",
+        [postId]
+    );
+    return rows;
+};
+
+
 
 module.exports = {
     findUserById,
@@ -109,7 +118,8 @@ module.exports = {
     createUser,
     createPost,
     getPosts,
-    getPostForEdit,
+    getPost,
     updatePost,
-    deletePost
+    deletePost,
+    getPostComments
 };
