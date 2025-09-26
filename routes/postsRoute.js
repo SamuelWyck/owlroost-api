@@ -9,7 +9,7 @@ const postsRoute = Router();
 
 postsRoute.get("/", postsController.postsGet);
 postsRoute.post("/new", isLoggedIn, postsController.newPostPost);
-postsRoute.get("/:postId/edit", isLoggedIn, postsController.postEditGet);
+postsRoute.get("/:postId", postsController.postGet);
 postsRoute.put("/:postId/edit", isLoggedIn, postsController.postEditPut);
 postsRoute.delete("/:postId/delete", isLoggedIn, postsController.deletePostDelete);
 
