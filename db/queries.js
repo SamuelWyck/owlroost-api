@@ -150,6 +150,16 @@ async function createComment(postId, userId, content) {
 };
 
 
+async function deleteComment(commentId, userId) {
+    const {rows} = await pool.query(
+        "DELETE FROM comments WHERE id = $1 AND author_id = $2 RETURNING *",
+        [commentId, userId]
+    );
+    const comment = (rows.length === 1) ? rows[0] : null;
+    return comment;
+};
+
+
 
 module.exports = {
     findUserById,
@@ -165,5 +175,6 @@ module.exports = {
     getPostLike,
     createPostLike,
     deletePostLike,
-    createComment
+    createComment,
+    deleteComment
 };
