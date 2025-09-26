@@ -163,6 +163,47 @@ const deletePostDelete = asyncHandler(async function(req, res) {
 
 
 
+const togglePostLike = asyncHandler(async function(req, res) {
+    if (!req.params ||!req.params.postId) {
+        return res.status(400).json(
+            {errors: [{msg: "Missing post id param"}]}
+        );
+    }
+
+    const postId = req.params.postId;
+    const userId = req.user.id;
+
+    let foundPostLike = null;
+    try {
+        foundPostLike = await db.getPostLike(postId, userId);
+    } catch (error) {
+        return res.status(500).json(
+            {errors: [{msg: "Unable to update post likes"}]}
+        );
+    }
+
+    const dbQuery = (foundPostLike) ? 
+    db.deletePostLike : db.createPostLike;
+
+    let postLike = null;
+    try {
+        postLike = await dbQuery(postId, userId);
+    } catch (error) {
+        return res.status(500).json(
+            {errors: [{msg: "Unable to update post likes"}]}
+        );
+    }
+    if (!postLike) {
+        return res.status(400).json(
+            {errors: [{msg: "Unable to update post likes"}]}
+        );
+    }
+
+    return res.json({result: "success"});
+});
+
+
+
 module.exports = {
     postsGet,
     newPostPost: [
@@ -174,5 +215,6 @@ module.exports = {
         editPostVal,
         postEditPut
     ],
-    deletePostDelete
+    deletePostDelete,
+    togglePostLike
 };
