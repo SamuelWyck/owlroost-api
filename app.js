@@ -7,6 +7,7 @@ const passport = require("./utils/passport.js");
 require("dotenv").config();
 const authRoute = require("./routes/authRoute.js");
 const postsRoute = require("./routes/postsRoute.js");
+const commentsRoute = require("./routes/commentsRoute.js");
 
 
 
@@ -45,6 +46,7 @@ app.get("/", function(req, res) {
 });
 app.use("/auth", authRoute);
 app.use("/posts", postsRoute);
+app.use("/comments", commentsRoute);
 
 
 
