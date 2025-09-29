@@ -1,7 +1,7 @@
 const asyncHandler = require("express-async-handler");
 const db = require("../db/queries.js");
 const {validationResult} = require("express-validator");
-const {newCommentVal} = require("../utils/validators.js");
+const {newCommentVal, editCommentVal} = require("../utils/validators.js");
 
 
 
@@ -94,11 +94,47 @@ const delCommentDelete = asyncHandler(async function(req, res) {
 
 
 
+const editCommentPut = asyncHandler(async function(req, res) {
+    const errors  = validationResult(req);
+    if (!errors.isEmpty()) {
+        return res.status(400).json({errors: errors.array()});
+    }
+
+    const content = req.body.content;
+    const userId = req.user.id;
+    const commentId = req.params.commentId;
+
+    let comment = null;
+    try {
+        comment = await db.updateComment(
+            content, commentId, userId
+        );
+    } catch (error) {
+        console.log(error);
+        return res.status(500).json(
+            {errors: [{msg: "Unable to edit comment"}]}
+        );
+    }
+    if (!comment) {
+        return res.status(400).json(
+            {errors: [{msg: "Unable to edit comment"}]}
+        );
+    }
+
+    return res.json({comment});
+});
+
+
+
 module.exports = {
     commentsGet,
     createCommentPost: [
         newCommentVal,
         createCommentPost
     ],
-    delCommentDelete
+    delCommentDelete,
+    editCommentPut: [
+        editCommentVal,
+        editCommentPut
+    ]
 };
