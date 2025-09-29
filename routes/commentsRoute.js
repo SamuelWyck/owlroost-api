@@ -9,6 +9,7 @@ const commentsRoute = Router();
 commentsRoute.get("/:postId", commentsController.commentsGet);
 commentsRoute.post("/new", isLoggedIn, commentsController.createCommentPost);
 commentsRoute.delete("/:commentId/delete", isLoggedIn, commentsController.delCommentDelete);
+commentsRoute.put("/:commentId/edit", isLoggedIn, commentsController.editCommentPut);
 
 
 
