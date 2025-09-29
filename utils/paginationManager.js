@@ -1,6 +1,6 @@
 class PaginationManger {
     postTakeNum = 21;
-    commentTakeNum = 3;
+    commentTakeNum = 41;
 
 
     calcPostSkip(pageNum) {
