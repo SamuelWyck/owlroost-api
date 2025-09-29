@@ -101,10 +101,10 @@ async function deletePost(postId, userId) {
 };
 
 
-async function getPostComments(postId) {
+async function getPostComments(postId, takeNum, offset) {
     const {rows} = await pool.query(
-        "SELECT c.id, c.content, c.author_id, c.timestamp, u.username, u.profile_img_url FROM comments AS c JOIN users AS u ON u.id = c.author_id WHERE c.post_id = $1",
-        [postId]
+        "SELECT c.id, c.content, c.author_id, c.timestamp, u.username, u.profile_img_url FROM comments AS c JOIN users AS u ON u.id = c.author_id WHERE c.post_id = $1 ORDER BY c.timestamp DESC, u.username DESC LIMIT $2 OFFSET $3",
+        [postId, takeNum, offset]
     );
     return rows;
 };
