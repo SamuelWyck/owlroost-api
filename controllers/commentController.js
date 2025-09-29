@@ -2,6 +2,7 @@ const asyncHandler = require("express-async-handler");
 const db = require("../db/queries.js");
 const {validationResult} = require("express-validator");
 const {newCommentVal, editCommentVal} = require("../utils/validators.js");
+const pagination = require("../utils/paginationManager.js");
 
 
 
@@ -12,11 +13,19 @@ const commentsGet = asyncHandler(async function(req, res) {
         );
     }
 
-
+    let pageNum = 0;
+    if (req.query && req.query.pageNum) {
+        pageNum = Number(req.query.pageNum);
+    }
     const postId = req.params.postId;
+
     let comments = null;
     try {
-        comments = await db.getPostComments(postId);
+        comments = await db.getPostComments(
+            postId,
+            pagination.commentTakeNum,
+            pagination.calcCommentSkip(pageNum)
+        );
     } catch (error) {
         console.log(error);
         return res.status(500).json(
@@ -29,7 +38,13 @@ const commentsGet = asyncHandler(async function(req, res) {
         );
     }
 
-    return res.json({user: req.user, comments});
+    let moreComments = false;
+    if (comments.length === pagination.commentTakeNum) {
+        comments.pop();
+        moreComments = true;
+    }
+
+    return res.json({user: req.user, comments, moreComments});
 });
 
 
