@@ -8,6 +8,7 @@ const userRoute = Router();
 
 userRoute.get("/:userId/posts", usersController.userPostsGet);
 userRoute.get("/:userId", usersController.userProfileGet);
+userRoute.get("/", usersController.usersGet);
 
 
 
