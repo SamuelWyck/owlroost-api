@@ -170,6 +170,33 @@ async function updateComment(content, commentId, userId) {
 };
 
 
+async function getUserPosts(userId) {
+    const {rows} = await pool.query(
+        "SELECT p.id, p.title, p.content, COUNT(pl.id) AS likes, p.timestamp AS date, u.username, u.profile_img_url FROM posts AS p JOIN users AS u ON u.id = p.author_id LEFT JOIN post_likes AS pl on pl.post_id = p.id WHERE u.id = $1 GROUP BY p.id, u.id",
+        [userId]
+    );
+    return rows;
+};
+
+
+async function getUserProfile(userId, requestingUser) {
+    let user = null;
+    let follow_requests = null;
+    if (requestingUser) {
+        [user, follow_requests] = await Promise.all([
+            pool.query("SELECT id, username, profile_img_url, info FROM users WHERE id = $1", [userId]),
+            pool.query("SELECT fr.id AS request_id, su.id AS sending_user_id, su.username AS sending_user_username, su.profile_img_url AS sending_user_img, ru.id AS receiving_user_id, ru.username AS receiving_user_username, ru.profile_img_url AS receiving_user_img FROM follow_requests AS fr JOIN users AS su ON su.id = fr.requesting_user_id JOIN users AS ru ON ru.id = fr.receiving_user_id WHERE fr.receiving_user_id = $1 OR fr.requesting_user_id = $1", [userId])
+        ]);
+        user = (user.rows.length === 1) ? user.rows[0] : null;
+        follow_requests = follow_requests.rows;
+    } else {
+        const {rows} = await pool.query("SELECT id, username, profile_img_url, info FROM users WHERE id = $1", [userId]);
+        user = (rows.length === 1) ? rows[0] : null;
+    }
+    return {user, follow_requests};
+};
+
+
 
 module.exports = {
     findUserById,
@@ -187,5 +214,7 @@ module.exports = {
     deletePostLike,
     createComment,
     deleteComment,
-    updateComment
+    updateComment,
+    getUserPosts,
+    getUserProfile
 };
