@@ -8,6 +8,7 @@ require("dotenv").config();
 const authRoute = require("./routes/authRoute.js");
 const postsRoute = require("./routes/postsRoute.js");
 const commentsRoute = require("./routes/commentsRoute.js");
+const usersRoute = require("./routes/usersRoute.js");
 
 
 
@@ -47,6 +48,7 @@ app.get("/", function(req, res) {
 app.use("/auth", authRoute);
 app.use("/posts", postsRoute);
 app.use("/comments", commentsRoute);
+app.use("/users", usersRoute);
 
 
 
