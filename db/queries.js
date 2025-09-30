@@ -197,6 +197,22 @@ async function getUserProfile(userId, requestingUser) {
 };
 
 
+async function getUsers(userId, nameSearch) {
+    let args = [userId, nameSearch];
+    let whereClause = "WHERE id != $1 AND username LIKE $2";
+    if (!nameSearch) {
+        whereClause = "WHERE id != $1";
+        args = [userId];
+    }
+
+    const {rows} = await pool.query(
+        `SELECT id, username, profile_img_url FROM users ${whereClause}`,
+        args
+    );
+    return rows;
+};
+
+
 
 module.exports = {
     findUserById,
@@ -216,5 +232,6 @@ module.exports = {
     deleteComment,
     updateComment,
     getUserPosts,
-    getUserProfile
+    getUserProfile,
+    getUsers
 };
