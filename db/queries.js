@@ -198,17 +198,14 @@ async function getUserProfile(userId, requestingUser) {
 
 
 async function getUsers(userId, nameSearch) {
-    let args = [userId, nameSearch];
-    let whereClause = "WHERE u.id != $1 AND u.username LIKE $2";
-    if (!nameSearch) {
-        whereClause = "WHERE u.id != $1";
-        args = [userId];
+    let SQL = `SELECT u.id, u.username, u.profile_img_url, ARRAY_AGG(sr.receiving_user_id) AS sent_requests, ARRAY_AGG(rr.requesting_user_id) AS received_requests, ARRAY_AGG(fu.followed_user_id) AS followed_users, ARRAY_AGG(uf.following_user_id) AS following_users FROM users AS u LEFT JOIN follow_requests AS sr ON sr.requesting_user_id = u.id LEFT JOIN follow_requests AS rr ON rr.receiving_user_id = u.id LEFT JOIN followed_users AS fu ON fu.following_user_id = u.id LEFT JOIN followed_users AS uf ON uf.followed_user_id = u.id WHERE u.id != $1 AND u.username ILIKE $2 GROUP BY u.id`;
+    let args = [userId, `${nameSearch}%`];
+    if (!userId) {
+        SQL = `SELECT u.id, u.username, u.profile_img_url, ARRAY_AGG(sr.receiving_user_id) AS sent_requests, ARRAY_AGG(rr.requesting_user_id) AS received_requests, ARRAY_AGG(fu.followed_user_id) AS followed_users, ARRAY_AGG(uf.following_user_id) AS following_users FROM users AS u LEFT JOIN follow_requests AS sr ON sr.requesting_user_id = u.id LEFT JOIN follow_requests AS rr ON rr.receiving_user_id = u.id LEFT JOIN followed_users AS fu ON fu.following_user_id = u.id LEFT JOIN followed_users AS uf ON uf.followed_user_id = u.id WHERE u.username ILIKE $1 GROUP BY u.id`;
+        args = [`${nameSearch}%`];
     }
 
-    const {rows} = await pool.query(
-        `SELECT u.id, u.username, u.profile_img_url, ARRAY_AGG(sr.receiving_user_id) AS sent_requests, ARRAY_AGG(rr.requesting_user_id) AS received_requests, ARRAY_AGG(fu.followed_user_id) AS followed_users, ARRAY_AGG(uf.following_user_id) AS following_users FROM users AS u LEFT JOIN follow_requests AS sr ON sr.requesting_user_id = u.id LEFT JOIN follow_requests AS rr ON rr.receiving_user_id = u.id LEFT JOIN followed_users AS fu ON fu.following_user_id = u.id LEFT JOIN followed_users AS uf ON uf.followed_user_id = u.id ${whereClause} GROUP BY u.id`,
-        args
-    );
+    const {rows} = await pool.query(SQL, args);
     return rows;
 };
 
