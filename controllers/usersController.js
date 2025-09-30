@@ -78,8 +78,77 @@ const usersGet = asyncHandler(async function(req, res) {
 
 
 
+const followUserPost = asyncHandler(async function(req, res) {
+    if (!req.params || !req.params.userId) {
+        return res.status(400).json(
+            {errors: [{msg: "Missing user id param"}]}
+        );
+    }
+
+    const userId = req.params.userId;
+    const reqUserId = req.user.id;
+    let request = null;
+    try {
+        request = await db.createFollowReq(userId, reqUserId);
+    } catch (error) {
+        console.log(error);
+        return res.status(500).json(
+            {errors: [{msg: "Unable to create request"}]}
+        );
+    }
+    if (!request) {
+        return res.status(400).json(
+            {errors: [{msg: "Unable to create request"}]}
+        );
+    }
+
+    return res.json({request});
+});
+
+
+
+const unfollowUserDel = asyncHandler(async function(req, res) {
+    if (!req.params || !req.params.userId) {
+        return res.status(400).json(
+            {errors: [{msg: "Missing user id param"}]}
+        );
+    }
+
+    const userId = req.params.userId;
+    const followingUserId = req.user.id;
+    let follow = null;
+    try {
+        const [reqfollow, acceptedFollow] = await Promise.all([
+            db.deleteFollowReq(userId, followingUserId),
+            db.deleteFollow(userId, followingUserId)
+        ]);
+        
+        if (reqfollow) {
+            follow = reqfollow;
+        } else {
+            follow = acceptedFollow;
+        }
+    } catch (error) {
+        console.log(error);
+        return res.status(500).json(
+            {errors: [{msg: "Unable to unfollow user"}]}
+        );
+    }
+    if (!follow) {
+        return res.status(400).json(
+            {errors: [{msg: "Unable to unfollow user"}]}
+        );
+    }
+
+    return res.json({follow});
+});
+
+
+
 module.exports = {
     userPostsGet,
     userProfileGet,
-    usersGet
+    usersGet,
+    followUserPost,
+    unfollowUserDel
 };
