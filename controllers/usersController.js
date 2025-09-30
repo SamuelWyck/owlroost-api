@@ -58,7 +58,28 @@ const userProfileGet = asyncHandler(async function(req, res) {
 
 
 
+const usersGet = asyncHandler(async function(req, res) {
+    const nameSearch = (req.query && req.query.name) ?
+    req.query.name : "";
+    const userId = (req.user) ? req.user.id : null;
+
+    let users = null;
+    try {
+        users = await db.getUsers(userId, nameSearch);
+    } catch (error) {
+        console.log(error);
+        return res.status(500).json(
+            {errors: [{msg: "Unable to get users"}]}
+        );
+    }
+    
+    return res.json({user: req.user, users});
+});
+
+
+
 module.exports = {
     userPostsGet,
-    userProfileGet
+    userProfileGet,
+    usersGet
 };
