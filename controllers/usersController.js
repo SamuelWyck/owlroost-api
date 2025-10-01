@@ -1,5 +1,6 @@
 const asyncHandler = require("express-async-handler");
 const db = require("../db/queries.js");
+const pagination = require("../utils/paginationManager.js");
 
 
 
@@ -59,21 +60,34 @@ const userProfileGet = asyncHandler(async function(req, res) {
 
 
 const usersGet = asyncHandler(async function(req, res) {
+    const pageNum = (req.query && req.query.pageNum) ?
+    Number(req.query.pageNum) : 0;
     const nameSearch = (req.query && req.query.name) ?
     req.query.name : "";
     const userId = (req.user) ? req.user.id : null;
 
     let users = null;
     try {
-        users = await db.getUsers(userId, nameSearch);
+        users = await db.getUsers(
+            userId, 
+            nameSearch,
+            pagination.userTakeNum,
+            pagination.calcUserSKip(pageNum)
+        );
     } catch (error) {
         console.log(error);
         return res.status(500).json(
             {errors: [{msg: "Unable to get users"}]}
         );
     }
-    
-    return res.json({user: req.user, users});
+
+    let moreUsers = false;
+    if (users.length === pagination.userTakeNum) {
+        users.pop();
+        moreUsers = true;
+    }
+
+    return res.json({user: req.user, users, moreUsers});
 });
 
 
