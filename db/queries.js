@@ -197,12 +197,12 @@ async function getUserProfile(userId, requestingUser) {
 };
 
 
-async function getUsers(userId, nameSearch) {
-    let SQL = `SELECT u.id, u.username, u.profile_img_url, ARRAY_AGG(sr.receiving_user_id) AS sent_requests, ARRAY_AGG(rr.requesting_user_id) AS received_requests, ARRAY_AGG(fu.followed_user_id) AS followed_users, ARRAY_AGG(uf.following_user_id) AS following_users FROM users AS u LEFT JOIN follow_requests AS sr ON sr.requesting_user_id = u.id LEFT JOIN follow_requests AS rr ON rr.receiving_user_id = u.id LEFT JOIN followed_users AS fu ON fu.following_user_id = u.id LEFT JOIN followed_users AS uf ON uf.followed_user_id = u.id WHERE u.id != $1 AND u.username ILIKE $2 GROUP BY u.id`;
-    let args = [userId, `${nameSearch}%`];
+async function getUsers(userId, nameSearch, limit, offset) {
+    let SQL = `SELECT u.id, u.username, u.profile_img_url, ARRAY_AGG(sr.receiving_user_id) AS sent_requests, ARRAY_AGG(rr.requesting_user_id) AS received_requests, ARRAY_AGG(fu.followed_user_id) AS followed_users, ARRAY_AGG(uf.following_user_id) AS following_users FROM users AS u LEFT JOIN follow_requests AS sr ON sr.requesting_user_id = u.id LEFT JOIN follow_requests AS rr ON rr.receiving_user_id = u.id LEFT JOIN followed_users AS fu ON fu.following_user_id = u.id LEFT JOIN followed_users AS uf ON uf.followed_user_id = u.id WHERE u.id != $1 AND u.username ILIKE $2 GROUP BY u.id ORDER BY u.username ASC, u.id DESC LIMIT $3 OFFSET $4`;
+    let args = [userId, `${nameSearch}%`, limit, offset];
     if (!userId) {
-        SQL = `SELECT u.id, u.username, u.profile_img_url, ARRAY_AGG(sr.receiving_user_id) AS sent_requests, ARRAY_AGG(rr.requesting_user_id) AS received_requests, ARRAY_AGG(fu.followed_user_id) AS followed_users, ARRAY_AGG(uf.following_user_id) AS following_users FROM users AS u LEFT JOIN follow_requests AS sr ON sr.requesting_user_id = u.id LEFT JOIN follow_requests AS rr ON rr.receiving_user_id = u.id LEFT JOIN followed_users AS fu ON fu.following_user_id = u.id LEFT JOIN followed_users AS uf ON uf.followed_user_id = u.id WHERE u.username ILIKE $1 GROUP BY u.id`;
-        args = [`${nameSearch}%`];
+        SQL = `SELECT u.id, u.username, u.profile_img_url, ARRAY_AGG(sr.receiving_user_id) AS sent_requests, ARRAY_AGG(rr.requesting_user_id) AS received_requests, ARRAY_AGG(fu.followed_user_id) AS followed_users, ARRAY_AGG(uf.following_user_id) AS following_users FROM users AS u LEFT JOIN follow_requests AS sr ON sr.requesting_user_id = u.id LEFT JOIN follow_requests AS rr ON rr.receiving_user_id = u.id LEFT JOIN followed_users AS fu ON fu.following_user_id = u.id LEFT JOIN followed_users AS uf ON uf.followed_user_id = u.id WHERE u.username ILIKE $1 GROUP BY u.id ORDER BY u.username ASC, u.id DESC LIMIT $2 OFFSET $3`;
+        args = [`${nameSearch}%`, limit, offset];
     }
 
     const {rows} = await pool.query(SQL, args);
