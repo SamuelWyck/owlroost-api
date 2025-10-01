@@ -172,7 +172,7 @@ async function updateComment(content, commentId, userId) {
 
 async function getUserPosts(userId) {
     const {rows} = await pool.query(
-        "SELECT p.id, p.title, p.content, COUNT(pl.id) AS likes, p.timestamp AS date, u.username, u.profile_img_url FROM posts AS p JOIN users AS u ON u.id = p.author_id LEFT JOIN post_likes AS pl on pl.post_id = p.id WHERE u.id = $1 GROUP BY p.id, u.id",
+        "SELECT p.id AS post_id, p.title, p.content, COUNT(pl.id) AS likes, p.timestamp AS date, p.author_id, u.username, u.profile_img_url FROM posts AS p JOIN users AS u ON u.id = p.author_id LEFT JOIN post_likes AS pl on pl.post_id = p.id WHERE u.id = $1 GROUP BY p.id, u.id",
         [userId]
     );
     return rows;
