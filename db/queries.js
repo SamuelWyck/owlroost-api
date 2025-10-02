@@ -184,13 +184,13 @@ async function getUserProfile(userId, requestingUser) {
     let follow_requests = null;
     if (requestingUser) {
         [user, follow_requests] = await Promise.all([
-            pool.query("SELECT u.id, u.username, u.profile_img_url, u.info, ARRAY_AGG(JSON_BUILD_OBJECT('followed_id', fu.id, 'followed_username', fu.username, 'followed_profile_img_url', fu.profile_img_url)) AS followed FROM users AS u LEFT JOIN followed_users AS f ON f.following_user_id = u.id LEFT JOIN users AS fu ON fu.id = f.followed_user_id WHERE u.id = $1 GROUP BY u.id", [userId]),
+            pool.query("SELECT u.id, u.username, u.profile_img_url, u.info, ARRAY_AGG(JSON_BUILD_OBJECT('id', fu.id, 'username', fu.username, 'profile_img_url', fu.profile_img_url)) AS followed FROM users AS u LEFT JOIN followed_users AS f ON f.following_user_id = u.id LEFT JOIN users AS fu ON fu.id = f.followed_user_id WHERE u.id = $1 GROUP BY u.id", [userId]),
             pool.query("SELECT fr.id AS request_id, su.id AS sending_user_id, su.username AS sending_user_username, su.profile_img_url AS sending_user_img, ru.id AS receiving_user_id, ru.username AS receiving_user_username, ru.profile_img_url AS receiving_user_img FROM follow_requests AS fr JOIN users AS su ON su.id = fr.requesting_user_id JOIN users AS ru ON ru.id = fr.receiving_user_id WHERE fr.receiving_user_id = $1 OR fr.requesting_user_id = $1", [userId])
         ]);
         user = (user.rows.length === 1) ? user.rows[0] : null;
         follow_requests = follow_requests.rows;
     } else {
-        const {rows} = await pool.query("SELECT u.id, u.username, u.profile_img_url, u.info, ARRAY_AGG(JSON_BUILD_OBJECT('followed_id', fu.id, 'followed_username', fu.username, 'followed_profile_img_url', fu.profile_img_url)) AS followed FROM users AS u LEFT JOIN followed_users AS f ON f.following_user_id = u.id LEFT JOIN users AS fu ON fu.id = f.followed_user_id WHERE u.id = $1 GROUP BY u.id", [userId]);
+        const {rows} = await pool.query("SELECT u.id, u.username, u.profile_img_url, u.info, ARRAY_AGG(JSON_BUILD_OBJECT('id', fu.id, 'username', fu.username, 'profile_img_url', fu.profile_img_url)) AS followed FROM users AS u LEFT JOIN followed_users AS f ON f.following_user_id = u.id LEFT JOIN users AS fu ON fu.id = f.followed_user_id WHERE u.id = $1 GROUP BY u.id", [userId]);
         user = (rows.length === 1) ? rows[0] : null;
     }
     return {user, follow_requests};
