@@ -232,12 +232,21 @@ async function deleteFollowReq(recUserId, reqUserId) {
 };
 
 
-async function deleteFollow(userId, followingUserId) {
+async function createFollow(followedUserId, followingUserId) {
+    const {rows} = await pool.query(
+        "INSERT INTO followed_users (followed_user_id, following_user_id) VALUES ($1, $2) RETURNING *",
+        [followedUserId, followingUserId]
+    );
+    const follow = (rows.length === 1) ? rows[0] : null;
+    return follow;
+};
+
+
+async function deleteFollow(followedUserId, followingUserId) {
     const {rows} = await pool.query(
         "DELETE FROM followed_users WHERE following_user_id = $1 AND followed_user_id = $2 RETURNING *",
-        [followingUserId, userId]
+        [followingUserId, followedUserId]
     );
-
     const follow = (rows.length === 1) ? rows[0] : null;
     return follow;
 };
@@ -292,6 +301,7 @@ module.exports = {
     getUsers,
     createFollowReq,
     deleteFollowReq,
+    createFollow,
     deleteFollow,
     isFollowingUser,
     updateUserInfo
