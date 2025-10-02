@@ -43,10 +43,12 @@ const userProfileGet = asyncHandler(async function(req, res) {
     const reqUserId = (req.user) ? req.user.id : null;
     const requestingUser = userId === reqUserId;
     let profile = null;
+    let followingUser = null;
     try {
-        profile = await db.getUserProfile(
-            userId, requestingUser
-        );
+        [profile, followingUser] = await Promise.all([
+            db.getUserProfile(userId, requestingUser),
+            db.isFollowingUser(reqUserId, userId)
+        ]);
     } catch (error) {
         console.log(error);
         return res.status(500).json(
@@ -54,7 +56,7 @@ const userProfileGet = asyncHandler(async function(req, res) {
         );
     }
 
-    return res.json({user: req.user, profile});
+    return res.json({user: req.user, profile, followingUser});
 });
 
 
