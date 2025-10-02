@@ -227,6 +227,44 @@ const rejectFollowDel = asyncHandler(async function(req, res) {
 
 
 
+const acceptFollowPost = asyncHandler(async function(req, res) {
+    if (!req.params.userId || !req.params.userId) {
+        return res.status(400).json(
+            {errors: [{msg: "Missing user id param"}]}
+        );
+    }
+
+    const followedUserId = req.user.id;
+    const followingUserId = req.params.userId;
+
+    let follow = null;
+    let request = null;
+    try {
+        [follow, request] = await Promise.all([
+            db.createFollow(
+                followedUserId, followingUserId
+            ),
+            db.deleteFollowReq(
+                followedUserId, followingUserId
+            )
+        ]);
+    } catch (error) {
+        console.log(error);
+        return res.status(500).json(
+            {errors: [{msg: "Unable to follow user"}]}
+        );
+    }
+    if (!follow) {
+        return res.status(400).json(
+            {errors: [{msg: "Unable to follow user"}]}
+        );
+    }
+
+    return res.json({follow});
+});
+
+
+
 module.exports = {
     userPostsGet,
     userProfileGet,
@@ -234,5 +272,6 @@ module.exports = {
     followUserPost,
     unfollowUserDel,
     updateUserInfoPut,
-    rejectFollowDel
+    rejectFollowDel,
+    acceptFollowPost
 };
