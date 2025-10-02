@@ -259,6 +259,16 @@ async function isFollowingUser(userId, followedUserId) {
 };
 
 
+async function updateUserInfo(userId, info) {
+    const {rows} = await pool.query(
+        "UPDATE users SET info = $2 WHERE id = $1 RETURNING id",
+        [userId, info]
+    );
+    const user = (rows.length === 1) ? rows[0] : null;
+    return user;
+};
+
+
 
 module.exports = {
     findUserById,
@@ -283,5 +293,6 @@ module.exports = {
     createFollowReq,
     deleteFollowReq,
     deleteFollow,
-    isFollowingUser
+    isFollowingUser,
+    updateUserInfo
 };
