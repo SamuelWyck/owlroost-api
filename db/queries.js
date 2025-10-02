@@ -243,6 +243,22 @@ async function deleteFollow(userId, followingUserId) {
 };
 
 
+async function isFollowingUser(userId, followedUserId) {
+    if (!userId) {
+        return false;
+    }
+    if (userId === followedUserId) {
+        return false;
+    }
+
+    const {rows} = await pool.query(
+        "SELECT * FROM followed_users AS fu FULL JOIN follow_requests AS fr ON fr.requesting_user_id = fu.following_user_id WHERE (fu.following_user_id = $1 AND fu.followed_user_id = $2) OR (fr.requesting_user_id = $1 AND fr.receiving_user_id = $2)",
+        [userId, followedUserId]
+    );
+    return rows.length === 1;
+};
+
+
 
 module.exports = {
     findUserById,
@@ -266,5 +282,6 @@ module.exports = {
     getUsers,
     createFollowReq,
     deleteFollowReq,
-    deleteFollow
+    deleteFollow,
+    isFollowingUser
 };
