@@ -12,6 +12,7 @@ userRoute.get("/:userId", usersController.userProfileGet);
 userRoute.get("/:userId/posts", usersController.userPostsGet);
 userRoute.post("/:userId/follow", isLoggedIn, usersController.followUserPost);
 userRoute.delete("/:userId/unfollow", isLoggedIn, usersController.unfollowUserDel);
+userRoute.post("/:userId/accept-follow", isLoggedIn, usersController.acceptFollowPost);
 userRoute.delete("/:userId/reject-follow", isLoggedIn, usersController.rejectFollowDel);
 userRoute.put("/update-info", isLoggedIn, usersController.updateUserInfoPut);
 
