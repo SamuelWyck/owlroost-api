@@ -222,10 +222,10 @@ async function createFollowReq(userId, reqUserId) {
 };
 
 
-async function deleteFollowReq(userId, reqUserId) {
+async function deleteFollowReq(recUserId, reqUserId) {
     const {rows} = await pool.query(
         "DELETE FROM follow_requests WHERE requesting_user_id = $1 AND receiving_user_id = $2 RETURNING *",
-        [reqUserId, userId]
+        [reqUserId, recUserId]
     );
     const request = (rows.length === 1) ? rows[0] : null;
     return request;
