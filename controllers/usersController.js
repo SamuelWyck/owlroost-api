@@ -161,10 +161,45 @@ const unfollowUserDel = asyncHandler(async function(req, res) {
 
 
 
+const updateUserInfoPut = asyncHandler(async function(req, res) {
+    if (!req.body || req.body.info === undefined) {
+        return res.status(400).json(
+            {errors: [{msg: "Missing info text"}]}
+        );
+    }
+    if (req.body.info.trim().length > 3000) {
+        return res.status(400).json(
+            {errors: [{msg: "Info text is too long"}]}
+        );
+    }
+
+    const userId = req.user.id;
+    const info = req.body.info.trim();
+    let user = null;
+    try {
+        user = await db.updateUserInfo(userId, info);
+    } catch (error) {
+        console.log(error);
+        return res.status(500).json(
+            {errors: [{msg: "Unable to update user info"}]}
+        );
+    }
+    if (!user) {
+        return res.status(400).json(
+            {errors: [{msg: "Unable to update user info"}]}
+        );
+    }
+
+    return res.json({result: "success"});
+});
+
+
+
 module.exports = {
     userPostsGet,
     userProfileGet,
     usersGet,
     followUserPost,
-    unfollowUserDel
+    unfollowUserDel,
+    updateUserInfoPut
 };
