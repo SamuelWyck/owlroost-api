@@ -4,7 +4,7 @@ CREATE TABLE IF NOT EXISTS "users" (
     username VARCHAR(250) UNIQUE NOT NULL,
     password TEXT NOT NULL,
     profile_img_url VARCHAR(600),
-    info VARCHAR(10000)
+    info VARCHAR(3000)
 );
 
 CREATE TABLE IF NOT EXISTS "posts" (
