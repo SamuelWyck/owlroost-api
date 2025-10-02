@@ -195,11 +195,44 @@ const updateUserInfoPut = asyncHandler(async function(req, res) {
 
 
 
+const rejectFollowDel = asyncHandler(async function(req, res) {
+    if (!req.params.userId || !req.params.userId) {
+        return res.status(400).json(
+            {errors: [{msg: "Missing user id param"}]}
+        );
+    }
+
+    const requestingUserId = req.params.userId;
+    const receivingUserId = req.user.id;
+
+    let request = null;
+    try {
+        request = await db.deleteFollowReq(
+            receivingUserId, requestingUserId
+        );
+    } catch (error) {
+        console.log(error);
+        return res.status(500).json(
+            {errors: [{msg: "Unable to delete request"}]}
+        );
+    }
+    if (!req) {
+        return res.status(400).json(
+            {errors: [{msg: "Unable to delete request"}]}
+        );
+    }
+
+    return res.json({request});
+});
+
+
+
 module.exports = {
     userPostsGet,
     userProfileGet,
     usersGet,
     followUserPost,
     unfollowUserDel,
-    updateUserInfoPut
+    updateUserInfoPut,
+    rejectFollowDel
 };
