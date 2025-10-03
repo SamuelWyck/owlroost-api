@@ -1,6 +1,7 @@
 const {Router} = require("express");
 const usersController = require("../controllers/usersController.js");
 const {isLoggedIn} = require("../utils/authMiddleware.js");
+const upload = require("../utils/multer.js");
 
 
 
@@ -17,6 +18,7 @@ userRoute.delete("/:userId/unfollow", isLoggedIn, usersController.unfollowUserDe
 userRoute.post("/:userId/accept-follow", isLoggedIn, usersController.acceptFollowPost);
 userRoute.delete("/:userId/reject-follow", isLoggedIn, usersController.rejectFollowDel);
 userRoute.put("/update-info", isLoggedIn, usersController.updateUserInfoPut);
+userRoute.post("/upload-image", isLoggedIn, upload.single("image"), usersController.uploadUserImgPost);
 
 
 
