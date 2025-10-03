@@ -278,6 +278,15 @@ async function updateUserInfo(userId, info) {
 };
 
 
+async function getUserComments(userId) {
+    const {rows} = await pool.query(
+        "SELECT c.id, c.content, c.timestamp, c.author_id, u.username, u.profile_img_url FROM comments AS c JOIN users AS u ON u.id = c.author_id WHERE c.author_id = $1 ORDER BY c.timestamp DESC",
+        [userId]
+    );
+    return rows;
+};
+
+
 
 module.exports = {
     findUserById,
@@ -304,5 +313,6 @@ module.exports = {
     createFollow,
     deleteFollow,
     isFollowingUser,
-    updateUserInfo
+    updateUserInfo,
+    getUserComments
 };
