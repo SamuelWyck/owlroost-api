@@ -73,7 +73,7 @@ async function getPosts(orderByLikes, limit, offset) {
 
 async function getPost(postId) {
     const {rows} = await pool.query(
-        "SELECT p.id, p.title, p.content, p.timestamp, COUNT(pl.id) AS likes, u.username, u.profile_img_url FROM posts AS p LEFT JOIN post_likes AS pl ON pl.post_id = p.id JOIN users AS u ON u.id = p.author_id WHERE p.id = $1 GROUP BY p.id, u.id",
+        "SELECT p.id, p.title, p.content, p.timestamp, p.author_id, COUNT(pl.id) AS likes, u.username, u.profile_img_url FROM posts AS p LEFT JOIN post_likes AS pl ON pl.post_id = p.id JOIN users AS u ON u.id = p.author_id WHERE p.id = $1 GROUP BY p.id, u.id",
         [postId]
     );
     const post = rows[0];
