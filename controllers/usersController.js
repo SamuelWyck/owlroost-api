@@ -11,10 +11,16 @@ const userPostsGet = asyncHandler(async function(req, res) {
         );
     }
 
+    const pageNum = (req.query && req.query.pageNum)
+    ? Number(req.query.pageNum) : 0;
     const userId = req.params.userId;
     let posts = null;
     try {
-        posts = await db.getUserPosts(userId);
+        posts = await db.getUserPosts(
+            userId,
+            pagination.postTakeNum,
+            pagination.calcPostSkip(pageNum)
+        );
     } catch (error) {
         console.log(error);
         return res.status(500).json(
@@ -27,7 +33,13 @@ const userPostsGet = asyncHandler(async function(req, res) {
         ); 
     }
 
-    return res.json({posts, user: req.user});
+    let morePosts = false;
+    if (posts.length === pagination.postTakeNum) {
+        posts.pop();
+        morePosts = true;
+    }
+
+    return res.json({posts, user: req.user, morePosts});
 });
 
 
@@ -40,9 +52,15 @@ const userCommentsGet = asyncHandler(async function(req, res) {
     }
 
     const userId = req.params.userId;
+    const pageNum = (req.query && req.query.pageNum)
+    ? Number(req.query.pageNum) : 0;
     let comments = null;
     try {
-        comments = await db.getUserComments(userId);
+        comments = await db.getUserComments(
+            userId,
+            pagination.commentTakeNum,
+            pagination.calcCommentSkip(pageNum)
+        );
     } catch (error) {
         console.log(error);
         return res.status(500).json(
@@ -50,7 +68,48 @@ const userCommentsGet = asyncHandler(async function(req, res) {
         );
     }
 
-    return res.json({comments, user: req.user});
+    let moreComments = false;
+    if (comments.length === pagination.commentTakeNum) {
+        comments.pop();
+        moreComments = true;
+    }
+
+    return res.json({comments, user: req.user, moreComments});
+});
+
+
+
+const userFollowedPostsGet = asyncHandler(async function(req, res) {
+    if (!req.params || !req.params.userId) {
+        return res.status(400).json(
+            {errors: [{msg: "Missing user id param"}]}
+        );
+    }
+
+    const userId = req.params.userId;
+    const pageNum = (req.query && req.query.pageNum)
+    ? Number(req.query.pageNum) : 0;
+    let posts = null;
+    try {
+        posts = await db.getUserFollowedPosts(
+            userId,
+            pagination.postTakeNum,
+            pagination.calcPostSkip(pageNum)
+        );
+    } catch (error) {
+        console.log(error);
+        return res.status(500).json(
+            {errors: [{msg: "Unable to get posts"}]}
+        );
+    }
+
+    let morePosts = false;
+    if (posts.length === pagination.postTakeNum) {
+        posts.pop();
+        morePosts = true;
+    }
+
+    return res.json({user: req.user, posts, morePosts});
 });
 
 
@@ -291,6 +350,7 @@ const acceptFollowPost = asyncHandler(async function(req, res) {
 module.exports = {
     userPostsGet,
     userCommentsGet,
+    userFollowedPostsGet,
     userProfileGet,
     usersGet,
     followUserPost,
