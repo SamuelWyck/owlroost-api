@@ -11,6 +11,7 @@ userRoute.get("/", usersController.usersGet);
 userRoute.get("/:userId", usersController.userProfileGet);
 userRoute.get("/:userId/posts", usersController.userPostsGet);
 userRoute.get("/:userId/comments", usersController.userCommentsGet);
+userRoute.get("/:userId/followed-posts", usersController.userFollowedPostsGet);
 userRoute.post("/:userId/follow", isLoggedIn, usersController.followUserPost);
 userRoute.delete("/:userId/unfollow", isLoggedIn, usersController.unfollowUserDel);
 userRoute.post("/:userId/accept-follow", isLoggedIn, usersController.acceptFollowPost);
