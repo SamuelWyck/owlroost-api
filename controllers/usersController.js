@@ -32,6 +32,29 @@ const userPostsGet = asyncHandler(async function(req, res) {
 
 
 
+const userCommentsGet = asyncHandler(async function(req, res) {
+    if (!req.params || !req.params.userId) {
+        return res.status(400).json(
+            {errors: [{msg: "Missing user id param"}]}
+        );
+    }
+
+    const userId = req.params.userId;
+    let comments = null;
+    try {
+        comments = await db.getUserComments(userId);
+    } catch (error) {
+        console.log(error);
+        return res.status(500).json(
+            {errors: [{msg: "Unable to get comments"}]}
+        );
+    }
+
+    return res.json({comments, user: req.user});
+});
+
+
+
 const userProfileGet = asyncHandler(async function(req, res) {
     if (!req.params || !req.params.userId) {
         return res.status(400).json(
@@ -267,6 +290,7 @@ const acceptFollowPost = asyncHandler(async function(req, res) {
 
 module.exports = {
     userPostsGet,
+    userCommentsGet,
     userProfileGet,
     usersGet,
     followUserPost,
