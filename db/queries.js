@@ -170,10 +170,10 @@ async function updateComment(content, commentId, userId) {
 };
 
 
-async function getUserPosts(userId) {
+async function getUserPosts(userId, limit, offset) {
     const {rows} = await pool.query(
-        "SELECT p.id AS post_id, p.title, p.content, COUNT(pl.id) AS likes, p.timestamp AS date, p.author_id, u.username, u.profile_img_url FROM posts AS p JOIN users AS u ON u.id = p.author_id LEFT JOIN post_likes AS pl on pl.post_id = p.id WHERE u.id = $1 GROUP BY p.id, u.id",
-        [userId]
+        "SELECT p.id AS post_id, p.title, p.content, COUNT(pl.id) AS likes, p.timestamp AS date, p.author_id, u.username, u.profile_img_url FROM posts AS p JOIN users AS u ON u.id = p.author_id LEFT JOIN post_likes AS pl on pl.post_id = p.id WHERE u.id = $1 GROUP BY p.id, u.id ORDER BY p.timestamp DESC, u.username ASC LIMIT $2 OFFSET $3",
+        [userId, limit, offset]
     );
     return rows;
 };
@@ -278,10 +278,19 @@ async function updateUserInfo(userId, info) {
 };
 
 
-async function getUserComments(userId) {
+async function getUserComments(userId, limit, offset) {
     const {rows} = await pool.query(
-        "SELECT c.id, c.content, c.timestamp, c.author_id, u.username, u.profile_img_url FROM comments AS c JOIN users AS u ON u.id = c.author_id WHERE c.author_id = $1 ORDER BY c.timestamp DESC",
-        [userId]
+        "SELECT c.id, c.content, c.timestamp, c.author_id, u.username, u.profile_img_url FROM comments AS c JOIN users AS u ON u.id = c.author_id WHERE c.author_id = $1 ORDER BY c.timestamp DESC, u.username ASC LIMIT $2 OFFSET $3",
+        [userId, limit, offset]
+    );
+    return rows;
+};
+
+
+async function getUserFollowedPosts(userId, limit, offset) {
+    const {rows} = await pool.query(
+        "SELECT p.id AS post_id, p.title, p.content, p.timestamp AS date, p.author_id, u.username, u.profile_img_url, COUNT(pl.id) AS likes FROM posts AS p JOIN users AS u ON u.id = p.author_id LEFT JOIN post_likes AS pl ON pl.post_id = p.id JOIN followed_users AS fu ON fu.followed_user_id = p.author_id WHERE fu.following_user_id = $1 GROUP BY p.id, u.id ORDER BY p.timestamp DESC, u.username ASC LIMIT $2 OFFSET $3",
+        [userId, limit, offset]
     );
     return rows;
 };
@@ -314,5 +323,6 @@ module.exports = {
     deleteFollow,
     isFollowingUser,
     updateUserInfo,
-    getUserComments
+    getUserComments,
+    getUserFollowedPosts
 };
