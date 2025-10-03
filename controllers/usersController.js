@@ -347,6 +347,13 @@ const acceptFollowPost = asyncHandler(async function(req, res) {
 
 
 
+const uploadUserImgPost = asyncHandler(async function(req, res) {
+    console.log(req.file);
+    return res.json({yes: "yes"});
+});
+
+
+
 module.exports = {
     userPostsGet,
     userCommentsGet,
@@ -357,5 +364,6 @@ module.exports = {
     unfollowUserDel,
     updateUserInfoPut,
     rejectFollowDel,
-    acceptFollowPost
+    acceptFollowPost,
+    uploadUserImgPost
 };
