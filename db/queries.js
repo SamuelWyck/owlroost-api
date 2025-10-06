@@ -89,7 +89,7 @@ async function getPosts(orderByLikes, limit, offset) {
 
 async function getPost(postId) {
     const {rows} = await pool.query(
-        "SELECT p.id, p.title, p.content, p.image_url, p.timestamp, p.author_id, COUNT(pl.id) AS likes, u.username, u.profile_img_url FROM posts AS p LEFT JOIN post_likes AS pl ON pl.post_id = p.id JOIN users AS u ON u.id = p.author_id WHERE p.id = $1 GROUP BY p.id, u.id",
+        "SELECT p.id, p.title, p.content, p.image_url, p.public_id, p.timestamp, p.author_id, COUNT(pl.id) AS likes, u.username, u.profile_img_url FROM posts AS p LEFT JOIN post_likes AS pl ON pl.post_id = p.id JOIN users AS u ON u.id = p.author_id WHERE p.id = $1 GROUP BY p.id, u.id",
         [postId]
     );
     const post = rows[0];
@@ -97,10 +97,10 @@ async function getPost(postId) {
 };
 
 
-async function updatePost(title, content, postId, userId) {
+async function updatePost(title, content, postId, userId, imageUrl, publlicId) {
     const {rows} = await pool.query(
-        "UPDATE posts SET title = $1, content = $2 WHERE id = $3 AND author_id = $4 RETURNING *",
-        [title, content, postId, userId]
+        "UPDATE posts SET title = $1, content = $2, image_url = $3, public_id = $4 WHERE id = $5 AND author_id = $6 RETURNING *",
+        [title, content, imageUrl, publlicId, postId, userId]
     );
     const post = rows[0];
     return post;
