@@ -13,6 +13,8 @@ CREATE TABLE IF NOT EXISTS "posts" (
     author_id UUID NOT NULL,
     title VARCHAR(200) NOT NULL,
     content VARCHAR(11000) NOT NULL,
+    image_url VARCHAR(600),
+    public_id VARCHAR(600),
     timestamp TIMESTAMP(3) DEFAULT CURRENT_TIMESTAMP, 
     CONSTRAINT fk_post_author_id FOREIGN KEY (author_id) REFERENCES users(id) ON DELETE CASCADE 
 );
