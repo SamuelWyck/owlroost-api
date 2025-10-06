@@ -18,6 +18,7 @@
   "homepage": "https://github.com/SamuelWyck/owlroost-api#readme",
   "dependencies": {
     "bcryptjs": "^3.0.2",
+    "cloudinary": "^2.7.0",
     "connect-pg-simple": "^10.0.0",
     "cors": "^2.8.5",
     "dotenv": "^17.2.2",
