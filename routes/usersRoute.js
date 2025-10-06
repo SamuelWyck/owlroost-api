@@ -19,6 +19,7 @@ userRoute.post("/:userId/accept-follow", isLoggedIn, usersController.acceptFollo
 userRoute.delete("/:userId/reject-follow", isLoggedIn, usersController.rejectFollowDel);
 userRoute.put("/update-info", isLoggedIn, usersController.updateUserInfoPut);
 userRoute.post("/upload-image", isLoggedIn, upload.single("image"), usersController.uploadUserImgPost);
+userRoute.delete("/delete-image", isLoggedIn, usersController.deleteUserImgPost);
 
 
 
