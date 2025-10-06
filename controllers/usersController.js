@@ -3,7 +3,7 @@ const db = require("../db/queries.js");
 const pagination = require("../utils/paginationManager.js");
 const fs = require("node:fs/promises");
 const path = require("node:path");
-const {uploadProfileImage, deleteImage} = require("../utils/cloudinary.js");
+const {uploadImage, deleteImage} = require("../utils/cloudinary.js");
 
 
 
@@ -374,13 +374,14 @@ const uploadUserImgPost = asyncHandler(async function(req, res) {
         );
     }
 
+    const uploadDir = process.env.CLOUDINARY_PROFILE_DIR;
     let imageInfo = null;
     let del = null;
     if (!user.profile_img_url) {
-        imageInfo = await uploadProfileImage(filePath);
+        imageInfo = await uploadImage(filePath, uploadDir);
     } else {
         [imageInfo, del] = await Promise.all([
-            uploadProfileImage(req.file.path),
+            uploadImage(filePath, uploadDir),
             deleteImage(user.profile_public_id)
         ]);
     }

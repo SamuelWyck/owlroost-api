@@ -9,13 +9,13 @@ cloudinary.config({
 });
 
 
-async function uploadProfileImage(filePath) {
+async function uploadImage(filePath, assetFolder) {
     let image = null;
     try {
         image = await cloudinary.uploader.upload(
             filePath, 
             {
-                asset_folder: process.env.CLOUDINARY_UPLOAD_DIR
+                asset_folder: assetFolder
             }
         );
     } catch (error) {
@@ -40,6 +40,6 @@ async function deleteImage(public_id) {
 
 
 module.exports = {
-    uploadProfileImage,
+    uploadImage,
     deleteImage
 };
