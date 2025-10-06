@@ -3,6 +3,9 @@ const db = require("../db/queries.js");
 const {validationResult} = require("express-validator");
 const {newPostVal, editPostVal} = require("../utils/validators.js");
 const pagination = require("../utils/paginationManager.js");
+const {uploadImage} = require("../utils/cloudinary.js");
+const path = require("node:path");
+const fs = require("node:fs/promises");
 
 
 
@@ -43,13 +46,33 @@ const newPostPost = asyncHandler(async function(req, res) {
         return res.status(400).json({errors: errors.array()});
     }
 
+    let imageUrl = null;
+    let publicId = null;
+    if (req.file) {
+        const filePath = path.resolve(req.file.path);
+        const uploadDir = process.env.CLOUDINARY_POST_DIR;
+        const imageInfo = await uploadImage(
+            filePath, uploadDir
+        );
+        await fs.unlink(filePath);
+        if (imageInfo.errors) {
+            return res.status(500).json(
+                {errors: imageInfo.errors}
+            );
+        }
+        imageUrl = imageInfo.secure_url;
+        publicId = imageInfo.public_id;
+    }
+
     const userId = req.user.id;
     const title = req.body.title;
     const content = req.body.content;
 
     let post = null;
     try {
-        post = await db.createPost(userId, title, content);
+        post = await db.createPost(
+            userId, title, content, imageUrl, publicId
+        );
     } catch (error) {
         console.log(error);
         return res.status(500).json(
