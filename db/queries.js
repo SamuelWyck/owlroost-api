@@ -4,7 +4,7 @@ const pool = require("./pool.js");
 
 async function findUserById(userId) {
     const {rows} = await pool.query(
-        "SELECT id, username, profile_img_url FROM users WHERE id = $1",
+        "SELECT id, username, profile_img_url, profile_public_id FROM users WHERE id = $1",
         [userId]
     );
 
@@ -14,6 +14,17 @@ async function findUserById(userId) {
     const user = rows[0];
     return user;
 };
+
+
+async function updateUserProfileImage(userId, url, public_id) {
+    const {rows} = await pool.query(
+        "UPDATE users SET profile_img_url = $2, profile_public_id = $3 WHERE id = $1 RETURNING id, username, profile_img_url",
+        [userId, url, public_id]
+    );
+    const user = (rows.length === 1) ? rows[0] : null;
+    return user;
+};
+
 
 async function findUserByUsername(username) {
     const {rows} = await pool.query(
@@ -28,6 +39,7 @@ async function findUserByUsername(username) {
     return user;
 };
 
+
 async function findUserByEmail(email) {
     const {rows} = await pool.query(
         "SELECT * FROM users WHERE email = $1",
@@ -40,6 +52,7 @@ async function findUserByEmail(email) {
     const user = rows[0];
     return user;
 };
+
 
 async function createUser(email, username, password) {
     const {rows} = await pool.query(
@@ -54,6 +67,7 @@ async function createUser(email, username, password) {
     return user;
 };
 
+
 async function createPost(userId, title, content) {
     const {rows} = await pool.query(
         "INSERT INTO posts (author_id, title, content) VALUES ($1, $2, $3) RETURNING *",
@@ -63,6 +77,7 @@ async function createPost(userId, title, content) {
     return post;
 };
 
+
 async function getPosts(orderByLikes, limit, offset) {
     const orderBy = (orderByLikes) ? "likes" : "date";
     const sql = `SELECT p.id AS post_id, p.title, p.timestamp AS date, COUNT(post_id) AS likes, u.id AS author_id, u.username, u.profile_img_url FROM posts AS p JOIN users AS u ON u.id = p.author_id LEFT JOIN post_likes AS pl ON pl.post_id = p.id GROUP BY p.id, u.id ORDER BY ${orderBy} DESC, u.username DESC LIMIT $1 OFFSET $2`;
@@ -70,6 +85,7 @@ async function getPosts(orderByLikes, limit, offset) {
     const {rows} = await pool.query(sql, [limit, offset]);
     return rows;
 };
+
 
 async function getPost(postId) {
     const {rows} = await pool.query(
@@ -198,11 +214,9 @@ async function getUserProfile(userId, requestingUser) {
 
 
 async function getUsers(userId, nameSearch, limit, offset) {
-    // let SQL = `SELECT u.id, u.username, u.profile_img_url, ARRAY_AGG(sr.receiving_user_id) AS sent_requests, ARRAY_AGG(rr.requesting_user_id) AS received_requests, ARRAY_AGG(fu.followed_user_id) AS followed_users, ARRAY_AGG(uf.following_user_id) AS following_users FROM users AS u LEFT JOIN follow_requests AS sr ON sr.requesting_user_id = u.id LEFT JOIN follow_requests AS rr ON rr.receiving_user_id = u.id LEFT JOIN followed_users AS fu ON fu.following_user_id = u.id LEFT JOIN followed_users AS uf ON uf.followed_user_id = u.id WHERE u.id != $1 AND u.username ILIKE $2 GROUP BY u.id ORDER BY u.username ASC, u.id DESC LIMIT $3 OFFSET $4`;
     let SQL = `SELECT u.id, u.username, u.profile_img_url, ARRAY_AGG(rr.requesting_user_id) AS received_requests, ARRAY_AGG(uf.following_user_id) AS following_users FROM users AS u LEFT JOIN follow_requests AS rr ON rr.receiving_user_id = u.id LEFT JOIN followed_users AS uf ON uf.followed_user_id = u.id WHERE u.id != $1 AND u.username ILIKE $2 GROUP BY u.id ORDER BY u.username ASC, u.id DESC LIMIT $3 OFFSET $4`;
     let args = [userId, `${nameSearch}%`, limit, offset];
     if (!userId) {
-        // SQL = `SELECT u.id, u.username, u.profile_img_url, ARRAY_AGG(sr.receiving_user_id) AS sent_requests, ARRAY_AGG(rr.requesting_user_id) AS received_requests, ARRAY_AGG(fu.followed_user_id) AS followed_users, ARRAY_AGG(uf.following_user_id) AS following_users FROM users AS u LEFT JOIN follow_requests AS sr ON sr.requesting_user_id = u.id LEFT JOIN follow_requests AS rr ON rr.receiving_user_id = u.id LEFT JOIN followed_users AS fu ON fu.following_user_id = u.id LEFT JOIN followed_users AS uf ON uf.followed_user_id = u.id WHERE u.username ILIKE $1 GROUP BY u.id ORDER BY u.username ASC, u.id DESC LIMIT $2 OFFSET $3`;
         SQL = `SELECT u.id, u.username, u.profile_img_url, ARRAY_AGG(rr.requesting_user_id) AS received_requests, ARRAY_AGG(uf.following_user_id) AS following_users FROM users AS u LEFT JOIN follow_requests AS rr ON rr.receiving_user_id = u.id LEFT JOIN followed_users AS uf ON uf.followed_user_id = u.id WHERE u.username ILIKE $1 GROUP BY u.id ORDER BY u.username ASC, u.id DESC LIMIT $2 OFFSET $3`;
         args = [`${nameSearch}%`, limit, offset];
     }
@@ -324,5 +338,6 @@ module.exports = {
     isFollowingUser,
     updateUserInfo,
     getUserComments,
-    getUserFollowedPosts
+    getUserFollowedPosts,
+    updateUserProfileImage
 };
