@@ -416,6 +416,36 @@ const uploadUserImgPost = asyncHandler(async function(req, res) {
 
 
 
+const deleteUserImgPost = asyncHandler(async function(req, res) {
+    const deleteRes = await deleteImage(
+        req.user.profile_public_id
+    );
+    if (deleteRes.errors) {
+        return res.status(500).json({errors: deleteRes.errors});
+    }
+
+    let user = null;
+    try {
+        user = await db.updateUserProfileImage(
+            req.user.id, null, null
+        );
+    } catch (error) {
+        console.log(error);
+        return res.status(500).json(
+            {errors: [{msg: "Unable to delete image"}]}
+        );
+    }
+    if (!user) {
+        return res.status(400).json(
+            {errors: [{msg: "Unable to delete image"}]}
+        );
+    }
+
+    return res.json({user});
+});
+
+
+
 module.exports = {
     userPostsGet,
     userCommentsGet,
@@ -427,5 +457,6 @@ module.exports = {
     updateUserInfoPut,
     rejectFollowDel,
     acceptFollowPost,
-    uploadUserImgPost
+    uploadUserImgPost,
+    deleteUserImgPost
 };
