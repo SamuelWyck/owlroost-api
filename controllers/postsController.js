@@ -3,7 +3,7 @@ const db = require("../db/queries.js");
 const {validationResult} = require("express-validator");
 const {newPostVal, editPostVal} = require("../utils/validators.js");
 const pagination = require("../utils/paginationManager.js");
-const {uploadImage} = require("../utils/cloudinary.js");
+const {uploadImage, deleteImage} = require("../utils/cloudinary.js");
 const path = require("node:path");
 const fs = require("node:fs/promises");
 
@@ -135,10 +135,61 @@ const postEditPut = asyncHandler(async function(req, res) {
     const title = req.body.title;
     const content = req.body.content;
 
+    let oldPost = null;
+    try {
+        oldPost = await db.getPost(postId);
+    } catch (error) {
+        console.log(error);
+        return res.status(500).json(
+            {errors: [{msg: "Unable to get post"}]}
+        );
+    }
+    if (!oldPost) {
+        return res.status(400).json(
+            {errors: [{msg: "Unable to get post"}]}
+        );
+    }
+
+    let imageUrl = oldPost.image_url;
+    let publicId = oldPost.public_id;
+    if (req.file) {
+        const filePath = path.resolve(req.file.path);
+        const uploadDir = process.env.CLOUDINARY_POST_DIR;
+        let imageInfo = null;
+        let delRes = null;
+        if (publicId) {
+            [imageInfo, delRes] = await Promise.all([
+                uploadImage(filePath, uploadDir),
+                deleteImage(publicId)
+            ]);
+        } else {
+            imageInfo = await uploadImage(filePath, uploadDir);
+        }
+        await fs.unlink(filePath);
+        if (imageInfo.errors || (delRes && delRes.errors)) {
+            return res.status(500).json(
+                {errors: [{msg: "Unable to upload image"}]}
+            );
+        }
+
+        imageUrl = imageInfo.secure_url;
+        publicId = imageInfo.public_id;
+    } else if (req.body.deleteImg && imageUrl) {
+        const deleteRes = await deleteImage(publicId);
+        if (deleteRes.errors) {
+            return res.status(500).json(
+                {errors: deleteRes.errors}
+            );
+        }
+
+        imageUrl = null;
+        publicId = null;
+    }
+
     let post = null;
     try {
         post = await db.updatePost(
-            title, content, postId, userId
+            title, content, postId, userId, imageUrl, publicId
         );
     } catch (error) {
         console.log(error);
