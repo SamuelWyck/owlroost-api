@@ -1,6 +1,9 @@
 const asyncHandler = require("express-async-handler");
 const db = require("../db/queries.js");
 const pagination = require("../utils/paginationManager.js");
+const fs = require("node:fs/promises");
+const path = require("node:path");
+const {uploadProfileImage, deleteImage} = require("../utils/cloudinary.js");
 
 
 
@@ -348,8 +351,67 @@ const acceptFollowPost = asyncHandler(async function(req, res) {
 
 
 const uploadUserImgPost = asyncHandler(async function(req, res) {
-    console.log(req.file);
-    return res.json({yes: "yes"});
+    if (!req.file) {
+        return res.status(400).json(
+            {errors: [{msg: "Missing image file"}]}
+        );
+    }
+
+    const userId = req.user.id;
+    const filePath = path.resolve(req.file.path);
+    let user = null;
+    try {
+        user = await db.findUserById(userId);
+    } catch (error) {
+        console.log(error);
+        return res.status(500).json(
+            {errors: [{msg: "Unable to get user"}]}
+        );
+    }
+    if (!user) {
+        return res.status(400).json(
+            {errors: [{msg: "Unable to get user"}]}
+        );
+    }
+
+    let imageInfo = null;
+    let del = null;
+    if (!user.profile_img_url) {
+        imageInfo = await uploadProfileImage(filePath);
+    } else {
+        [imageInfo, del] = await Promise.all([
+            uploadProfileImage(req.file.path),
+            deleteImage(user.profile_public_id)
+        ]);
+    }
+    await fs.unlink(filePath);
+    if (imageInfo.errors || (del && del.errors)) {
+        return res.status(500).json({
+            errors: [{msg: "unable to upload image"}]
+        });
+    }
+
+    let updatedUser = null;
+    try {
+        updatedUser = await db.updateUserProfileImage(
+            userId, imageInfo.secure_url, imageInfo.public_id
+        );
+    } catch (error) {
+        console.log(error);
+        return res.status(500).json(
+            {errors: [{msg: "Error updating image"}]}
+        );
+    }
+    if (!updatedUser) {
+        return res.status(400).json(
+            {errors: [{msg: "Error updating image"}]}
+        );
+    }
+
+    return res.json({
+        user: updatedUser, 
+        img_url: updatedUser.profile_img_url
+    });
 });
 
 
