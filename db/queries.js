@@ -68,10 +68,10 @@ async function createUser(email, username, password) {
 };
 
 
-async function createPost(userId, title, content) {
+async function createPost(userId, title, content, imageUrl, puclicId) {
     const {rows} = await pool.query(
-        "INSERT INTO posts (author_id, title, content) VALUES ($1, $2, $3) RETURNING *",
-        [userId, title, content]
+        "INSERT INTO posts (author_id, title, content, image_url, public_id) VALUES ($1, $2, $3, $4, $5) RETURNING *",
+        [userId, title, content, imageUrl, puclicId]
     );
     const post = rows[0];
     return post;
@@ -89,7 +89,7 @@ async function getPosts(orderByLikes, limit, offset) {
 
 async function getPost(postId) {
     const {rows} = await pool.query(
-        "SELECT p.id, p.title, p.content, p.timestamp, p.author_id, COUNT(pl.id) AS likes, u.username, u.profile_img_url FROM posts AS p LEFT JOIN post_likes AS pl ON pl.post_id = p.id JOIN users AS u ON u.id = p.author_id WHERE p.id = $1 GROUP BY p.id, u.id",
+        "SELECT p.id, p.title, p.content, p.image_url, p.timestamp, p.author_id, COUNT(pl.id) AS likes, u.username, u.profile_img_url FROM posts AS p LEFT JOIN post_likes AS pl ON pl.post_id = p.id JOIN users AS u ON u.id = p.author_id WHERE p.id = $1 GROUP BY p.id, u.id",
         [postId]
     );
     const post = rows[0];
