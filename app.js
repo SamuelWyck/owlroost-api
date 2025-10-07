@@ -33,8 +33,8 @@ app.use(expressSession({
     saveUninitialized: false,
     cookie: {
         maxAge: 1000 * 60 * 60 * 24 * 7, // one week
-        // sameSite: "none",
-        // secure: true
+        sameSite: "none",
+        secure: true
     }
 }));
 
@@ -42,13 +42,23 @@ app.use(passport.initialize());
 app.use(passport.session());
 
 
-app.get("/", function(req, res) {
-    res.json({result: "Hello world"});
-});
 app.use("/auth", authRoute);
 app.use("/posts", postsRoute);
 app.use("/comments", commentsRoute);
 app.use("/users", usersRoute);
+
+app.use(function(req, res) {
+    return res.status(404).json(
+        {errors: [{msg: "Page not found"}]}
+    );
+});
+
+app.use(function(error, req, res, next) {
+    console.log(error);
+    return res.status(500).json(
+        {errors: [{msg: "Server error"}]}
+    );
+});
 
 
 
