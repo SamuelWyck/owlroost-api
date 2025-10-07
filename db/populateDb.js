@@ -1,6 +1,7 @@
 const {Client} = require("pg");
 const {readFileSync} = require("node:fs");
 const path = require("node:path");
+const fs = require("node:fs");
 
 
 
@@ -11,7 +12,11 @@ async function main() {
     const schema = readFileSync(fullSchemaPath, {encoding: "utf8"});
     
     const client = new Client({
-        connectionString: process.argv[2]
+        connectionString: process.argv[2],
+        // ssl: {
+        //     require: true,
+        //     ca: fs.readFileSync(path.join(__dirname, "../ca.pem")).toString()
+        // }
     });
     await client.connect();
     await client.query(schema);
