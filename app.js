@@ -9,6 +9,8 @@ const authRoute = require("./routes/authRoute.js");
 const postsRoute = require("./routes/postsRoute.js");
 const commentsRoute = require("./routes/commentsRoute.js");
 const usersRoute = require("./routes/usersRoute.js");
+const fs = require("node:fs");
+const path = require("node:path");
 
 
 
@@ -25,7 +27,11 @@ app.use(express.json());
 app.use(expressSession({
     store: new pgSession({
         pool: new Pool({
-            connectionString: process.env.DATABASE_URL
+            connectionString: process.env.DATABASE_URL,
+            ssl: {
+                require: true,
+                ca: fs.readFileSync(path.join(__dirname, "./ca.pem")).toString()
+            }
         })
     }),
     secret: process.env.SESSION_SECRET,
