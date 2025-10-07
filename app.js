@@ -40,7 +40,7 @@ app.use(expressSession({
     cookie: {
         maxAge: 1000 * 60 * 60 * 24 * 7, // one week
         sameSite: "none",
-        // secure: true
+        secure: true
     }
 }));
 
