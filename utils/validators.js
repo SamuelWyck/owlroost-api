@@ -4,11 +4,17 @@ const db = require("../db/queries.js");
 
 
 async function isUniqueUsername(username) {
-    const user = await db.findUserByUsername(username);
-    if (user) {
-        throw new Error("Username in use");
+    try {
+        const user = await db.findUserByUsername(username);
+        if (user) {
+            throw new Error("Username in use");
+        }
+        return true;
+
+    } catch (error) {
+        console.log(error);
+        throw Error()
     }
-    return true;
 };
 
 async function isUniqueEmail(email) {
